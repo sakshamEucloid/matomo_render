@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: matomo
+    env: docker
+    dockerContext: .
+    plan: free
+    # envVars:
+    #   - key: MYSQL_ROOT_PASSWORD
+    #     sync: false
+    #   - key: MYSQL_DATABASE
+    #     value: matomo
+    #   - key: MYSQL_USER
+    #     value: matomo
+    #   - key: MYSQL_PASSWORD
+    #     sync: false

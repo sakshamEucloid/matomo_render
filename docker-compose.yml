@@ -1,0 +1,35 @@
+services:
+  matomo-db:
+    image: mariadb:10.6
+    command: --max-allowed-packet=64M
+    container_name: matomo-db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=matomo
+      - MYSQL_DATABASE=matomo
+      - MYSQL_USER=matomo
+      - MYSQL_PASSWORD=matomo
+    volumes:
+      - db_data:/var/lib/mysql
+
+  matomo-app:
+    image: matomo
+    depends_on:
+      - matomo-db
+    container_name: matomo-app
+    restart: always
+    ports:
+      - "8081:80"   # Matomo dashboard available at http://localhost:8081
+    environment:
+      - MATOMO_DATABASE_HOST=matomo-db
+      - MATOMO_DATABASE_ADAPTER=mysql
+      - MATOMO_DATABASE_TABLES_PREFIX=matomo_
+      - MATOMO_DATABASE_USERNAME=matomo
+      - MATOMO_DATABASE_PASSWORD=matomo
+      - MATOMO_DATABASE_DBNAME=matomo
+    volumes:
+      - matomo_data:/var/www/html
+
+volumes:
+  db_data:
+  matomo_data:
