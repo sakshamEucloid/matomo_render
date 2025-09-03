@@ -2,14 +2,29 @@ services:
   - type: web
     name: matomo
     env: docker
-    dockerContext: .
     plan: free
-    # envVars:
-    #   - key: MYSQL_ROOT_PASSWORD
-    #     sync: false
-    #   - key: MYSQL_DATABASE
-    #     value: matomo
-    #   - key: MYSQL_USER
-    #     value: matomo
-    #   - key: MYSQL_PASSWORD
-    #     sync: false
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: MATOMO_DATABASE_HOST
+        value: matomo
+      - key: MATOMO_DATABASE_USERNAME
+        value: matomo
+      - key: MATOMO_DATABASE_PASSWORD
+        value: matomo
+      - key: MATOMO_DATABASE_DBNAME
+        value: matomo
+
+  - type: private_service
+    name: matomo-db
+    env: docker
+    dockerfilePath: ./db.Dockerfile
+    plan: free
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: matomo
+      - key: MYSQL_DATABASE
+        value: matomo
+      - key: MYSQL_USER
+        value: matomo
+      - key: MYSQL_PASSWORD
+        value: matomo
