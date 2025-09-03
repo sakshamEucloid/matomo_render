@@ -1,34 +1,43 @@
+version: "3.8"
+
 services:
+  website:
+    build: ./website
+    container_name: website
+    ports:
+      - "8080:80"   # Website available at http://localhost:8080
+    restart: always
+
   matomo-db:
     image: mariadb:10.6
-    command: --max-allowed-packet=64M
     container_name: matomo-db
-    restart: always
+    command: --max-allowed-packet=64M
     environment:
-      - MYSQL_ROOT_PASSWORD=matomo
-      - MYSQL_DATABASE=matomo
-      - MYSQL_USER=matomo
-      - MYSQL_PASSWORD=matomo
+      MYSQL_ROOT_PASSWORD: matomo
+      MYSQL_DATABASE: matomo
+      MYSQL_USER: matomo
+      MYSQL_PASSWORD: matomo
     volumes:
       - db_data:/var/lib/mysql
+    restart: always
 
   matomo-app:
-    image: matomo
+    build: ./matomo
+    container_name: matomo-app
+    ports:
+      - "8081:80"   # Matomo dashboard at http://localhost:8081
+    environment:
+      MATOMO_DATABASE_HOST: matomo-db
+      MATOMO_DATABASE_ADAPTER: mysql
+      MATOMO_DATABASE_TABLES_PREFIX: matomo_
+      MATOMO_DATABASE_USERNAME: matomo
+      MATOMO_DATABASE_PASSWORD: matomo
+      MATOMO_DATABASE_DBNAME: matomo
     depends_on:
       - matomo-db
-    container_name: matomo-app
-    restart: always
-    ports:
-      - "8081:80"   # Matomo dashboard available at http://localhost:8081
-    environment:
-      - MATOMO_DATABASE_HOST=matomo-db
-      - MATOMO_DATABASE_ADAPTER=mysql
-      - MATOMO_DATABASE_TABLES_PREFIX=matomo_
-      - MATOMO_DATABASE_USERNAME=matomo
-      - MATOMO_DATABASE_PASSWORD=matomo
-      - MATOMO_DATABASE_DBNAME=matomo
     volumes:
       - matomo_data:/var/www/html
+    restart: always
 
 volumes:
   db_data:
