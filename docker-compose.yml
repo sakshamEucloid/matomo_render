@@ -5,8 +5,10 @@ services:
     build: ./website
     container_name: website
     ports:
-      - "8080:80"   # Website available at http://localhost:8080
+      - "8080:80"
     restart: always
+    depends_on:
+      - growthbook
 
   matomo-db:
     image: mariadb:10.6
@@ -25,7 +27,7 @@ services:
     build: ./matomo
     container_name: matomo-app
     ports:
-      - "8081:80"   # Matomo dashboard at http://localhost:8081
+      - "8081:80"
     environment:
       MATOMO_DATABASE_HOST: matomo-db
       MATOMO_DATABASE_ADAPTER: mysql
@@ -39,6 +41,31 @@ services:
       - matomo_data:/var/www/html
     restart: always
 
+  growthbook-mongo:
+    image: mongo:4.4
+    container_name: growthbook-mongo
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+
+  growthbook:
+    image: growthbook/growthbook:latest
+    container_name: growthbook
+    restart: always
+    ports:
+      - "3100:3100"
+      - "3000:3000"   
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://growthbook-mongo:27017/growthbook
+      JWT_SECRET: matomo123
+      ENCRYPTION_KEY: "q2w3e4r5t6y7u8i9o0p123456789abcd"
+      APP_ORIGIN: "http://localhost:3000"
+      CORS_ORIGIN: "*"
+    depends_on:
+      - growthbook-mongo
+
 volumes:
   db_data:
   matomo_data:
+  mongo_data:

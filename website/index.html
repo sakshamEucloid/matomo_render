@@ -3,7 +3,7 @@
 <head>
 	
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width; initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="shortcut icon" type="image/x-icon" href="img/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="css/main.css">
@@ -315,21 +315,211 @@
 	<script type="text/javascript" src="js/uikit.min.js"></script>
 	<script type="text/javascript" src="js/uikit-icons.min.js"></script>
 	<!-- Matomo -->
-	<script>
-	var _paq = window._paq = window._paq || [];
-	/* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-	_paq.push(['trackPageView']);
-	_paq.push(['enableLinkTracking']);
-	(function() {
-	  var u="//localhost:8081/";
-	  _paq.push(['setTrackerUrl', u+'matomo.php']);
-	  _paq.push(['setSiteId', '1']);
-	  var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-	  g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
-	})();
-  </script>
-  <!-- End Matomo Code -->
-  
+<script>
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//localhost:8081/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '1']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
+<script>
+  // -------- SCROLL DEPTH TRACKING --------
+  const scrollThresholds = [20, 40, 60, 80, 100];
+  let reached = new Set();
+
+  window.addEventListener("scroll", () => {
+    let scrollTop = window.scrollY;
+    let docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    let scrolled = Math.round((scrollTop / docHeight) * 100);
+
+    scrollThresholds.forEach((t) => {
+      if (scrolled >= t && !reached.has(t)) {
+        _paq.push([
+          'trackEvent',
+          'Scroll',
+          'Scrolled ' + t + '%',
+          document.title + ' (' + window.location.pathname + ')'
+        ]);
+        reached.add(t);
+      }
+    });
+  });
+
+  // -------- CLICK TRACKING (Image, Video, Button) --------
+  document.addEventListener("DOMContentLoaded", () => {
+    // Images
+    document.querySelectorAll("img").forEach((img) => {
+      img.addEventListener("click", () => {
+        _paq.push([
+          'trackEvent',
+          'Image',
+          'Click',
+          img.src + ' on ' + document.title + ' (' + window.location.pathname + ')'
+        ]);
+      });
+    });
+
+    // Videos
+    document.querySelectorAll("video").forEach((vid) => {
+      vid.addEventListener("click", () => {
+        _paq.push([
+          'trackEvent',
+          'Video',
+          'Click',
+          vid.currentSrc + ' on ' + document.title + ' (' + window.location.pathname + ')'
+        ]);
+      });
+    });
+
+	document.querySelectorAll("a[href]").forEach((link) => {
+    if (/\.(mp4|webm|ogg)$/i.test(link.href) || /youtu|vimeo/i.test(link.href)) {
+      link.addEventListener("click", () => {
+        _paq.push([
+          'trackEvent',
+          'Video',
+          'Play Link',
+          link.href + ' on ' + document.title + ' (' + window.location.pathname + ')'
+        ]);
+      });
+    }
+  });
+
+
+    // Buttons
+    document.querySelectorAll("a.btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      _paq.push([
+        'trackEvent',
+        'Button',
+        'Click',
+        (btn.innerText.trim() || btn.href || 'Unnamed Button')
+          + ' on ' + document.title + ' (' + window.location.pathname + ')'
+      ]);
+    });
+  });
+
+  // -------- FORM SUBMIT BUTTONS (input[type=submit]) --------
+  document.querySelectorAll("input[type=submit], button[type=submit]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      _paq.push([
+        'trackEvent',
+        'Form',
+        'Submit',
+        (btn.value || btn.innerText || 'Unnamed Submit')
+          + ' on ' + document.title + ' (' + window.location.pathname + ')'
+      ]);
+    });
+  });
+  });
+</script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@growthbook/growthbook/dist/bundles/index.js"></script>
+<script src="test.js"></script>
+
+    <!-- <script>
+        // Your provided GrowthBook script
+        // 1️⃣ Determine API host automatically
+        let growthbookApiHost;
+        if (window.location.hostname === "localhost") {
+            // Accessing via host browser
+            growthbookApiHost = "http://localhost:3100";
+        } else {
+            // Accessing via Docker container network
+            growthbookApiHost = "http://growthbook:3100";
+        }
+        console.log("🔹 GrowthBook API host:", growthbookApiHost);
+        // 2️⃣ Dynamically load GrowthBook auto bundle
+        const gbScript = document.createElement("script");
+        gbScript.src = "https://cdn.jsdelivr.net/npm/@growthbook/growthbook/dist/bundles/auto.min.js";
+        gbScript.async = true;
+        gbScript.setAttribute("data-api-host", growthbookApiHost);
+        gbScript.setAttribute("data-client-key", "sdk-EMr67bTFgH00gWb");
+        gbScript.setAttribute("data-enable-dev-mode", "true");
+        document.body.appendChild(gbScript);
+        // 3️⃣ Check if GrowthBook loaded
+        document.addEventListener("growthbookLoaded", () => {
+            console.log("✅ GrowthBook initialized");
+            // List all features
+            console.log("Features:", window.growthbook.getAllFeatures());
+            // Example: check a specific flag
+            const biggerSeeMore = window.growthbook.feature("bigger-see-more");
+            console.log("bigger-see-more value:", biggerSeeMore.on);
+            // Optional: use feature in UI
+            if (biggerSeeMore.on) {
+                console.log("Showing bigger see more UI");
+            } else {
+                console.log("Showing default UI");
+            }
+        });
+        // 4️⃣ Fallback if GrowthBook fails to load
+        setTimeout(() => {
+            if (!window.growthbook) {
+                console.warn("❌ GrowthBook did NOT load (check network/CORS or API host)");
+            }
+        }, 3000);
+    </script> -->
+
+
+<script>
+window.growthbook_config = window.growthbook_config || {};
+window.growthbook_config.trackingCallback = (experiment, result) => {
+  window["_paq"] = window._paq || [];
+  window._paq.push([
+    "trackEvent",
+    "ExperimentViewed",
+    experiment.key,
+    "v" + result.key,
+  ]);
+};
+</script>
+
+
+<script>
+if (window._growthbook?.isOn("bigger-see-more")) {
+  console.log("Feature is enabled!")
+}
+</script>
+
+<!-- <script
+  data-api-host="http://localhost:3100"
+  data-client-key="sdk-EMr67bTFgH00gWb"
+  data-enable-dev-mode="true"
+  src="https://cdn.jsdelivr.net/npm/@growthbook/growthbook/dist/bundles/auto.min.js">
+</script>
+
+
+
+<script>
+  document.addEventListener("growthbookLoaded", () => {
+    console.log("✅ GrowthBook initialized");
+
+    // List all features
+    console.log("Features:", window.growthbook.getAllFeatures());
+
+    // Example: check a specific flag
+    const biggerSeeMore = window.growthbook.feature("bigger-see-more");
+    console.log("bigger-see-more value:", biggerSeeMore.on);
+
+    // Use it in your UI
+    if (biggerSeeMore.on) {
+      console.log("Showing bigger see more UI");
+    } else {
+      console.log("Showing default UI");
+    }
+  });
+</script> -->
+
+
+
   
 </body>
 </html>
