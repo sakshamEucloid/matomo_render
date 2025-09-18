@@ -9,6 +9,7 @@ services:
     restart: always
     depends_on:
       - growthbook
+      - matomo-app
 
   matomo-db:
     image: mariadb:10.6
